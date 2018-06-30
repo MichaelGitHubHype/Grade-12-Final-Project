@@ -1379,6 +1379,7 @@ def chooseChar():
             if mouseButton==LEFT:
                 if 'eagle.png' in players.values():
                     pass
+                # Entering the eagle as part of the players
                 else:
                     char='eagle.png'
                     players['Player'+str(c)]='eagle.png'
@@ -1388,7 +1389,7 @@ def chooseChar():
                     playersAndProperty['Player'+str(c)] = []
                     is_in_jail['Player'+str(c)] = False
                     playersAndBuses['Player'+str(c)] = 0
-                    c+=1
+                    c += 1
                     listOfImages.append(char)
                     strokeWeight(0)
     noTint()
