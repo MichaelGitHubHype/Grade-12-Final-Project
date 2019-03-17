@@ -1,4 +1,4 @@
-# By: Michael Sheinman, Jake Graef
+# By: Michael Sheinman, Jake Graef, Chase Lupton
 # Finished in June 20, 2018
 # monopoly
 # This is the final version of our monopoly game
@@ -13,7 +13,7 @@ actualTurn = 1
 baserentcost = 50
 bank_balance = 9999999
 c = 1
-countDeaths = 0
+countDeaths=0
 talking = 0
 indexer = 0
 infoShow = 0
@@ -33,11 +33,12 @@ countdown = 0
 one = 0
 two = 0
 variableNum = 1
-# Initial x & y position of the user
 x = 750
 y = 555
 
-
+listOfImages=[]
+prop=[1,4,20,21,30,38]
+podiumPlayers=[]
 
 # Booleans
 house_in_progress = False
@@ -56,9 +57,9 @@ attempt_one = False
 wait = False
 sold = False
 toShow = False
-intructions = False
+intructions=False
 cool_bonus = False
-podiums = False
+podiums=False
 show_passed_go = False
 instruct = False
 rent_in_progress = False
@@ -75,29 +76,25 @@ delaney_forces = False
 did_game_start_two = False
 
 # Lists
-listOfImages=[]
-prop=[1,4,20,21,30,38]
-podiumPlayers=[]
 listOfNum2=[]
 HouseAngleList={}
 placesNoHouses=['DETENTION', 'GO', 'GO TO', 'BUS STOP 1', 'BUS STOP 2', 'BUS STOP 3', 'BUS STOP 4',
                 'GRAD FEES','ANNOUNCEMENTS','BONUS MARKS','STUDENT PARKING','NCDSB','DSBN']
 placesToNotDoAnything = ['DETENTION', 'GO', 'GO TO']
-places = ['GO','BDSS','BONUS MARKS','WESTLANE','GRAD FEES','BUS STOP 1','ST. MICHAELS',
+places=['GO','BDSS','BONUS MARKS','WESTLANE','GRAD FEES','BUS STOP 1','ST. MICHAELS',
         'ANNOUNCEMENTS','ST. PAULS','LAURA SECORD','DETENTION','A-N MYER','NCDSB',
         'SIR W. CHURCHIL','ST. FRANCIS','BUS STOP 2','HOLY CROSS','BONUS MARKS','EDEN',
         'DENNIS MORRIS','STUDENT PARKING','THOROLD','ANNOUNCEMENTS','WELLAND',
         'NIAGARA CATHOLIC','BUS STOP 3','ST. CALLEGIATE','E.L. CROSSLY','DSBN'
         ,'PORT COLBORNE','GO TO','ORCHARD PARK','DSBN ACADEMY','BONUS MARKS','LAKESHORE',
         'BUS STOP 4','ANNOUNCEMENTS','BLESSED TRINITY','GRAD FEES','GSS']
-bank_places = ['GO', 'BDSS', 'BONUS MARKS','WESTLANE','GRAD FEES','BUS STOP 1','ST. MICHAELS',
+bank_places=['GO', 'BDSS', 'BONUS MARKS','WESTLANE','GRAD FEES','BUS STOP 1','ST. MICHAELS',
         'ANNOUNCEMENTS','ST. PAULS','LAURA SECORD','DETENTION','A-N MYER','NCDSB',
         'SIR W. CHURCHIL','ST. FRANCIS','BUS STOP 2','HOLY CROSS','BONUS MARKS','EDEN',
         'DENNIS MORRIS','STUDENT PARKING','THOROLD','ANNOUNCEMENTS','WELLAND',
         'NIAGARA CATHOLIC','BUS STOP 3','ST. CALLEGIATE','E.L. CROSSLY','DSBN'
         ,'PORT COLBORNE','GO TO','ORCHARD PARK','DSBN ACADEMY','BONUS MARKS','LAKESHORE',
         'BUS STOP 4','ANNOUNCEMENTS','BLESSED TRINITY','GRAD FEES','GSS']
-# words for instructions
 words = [       "","","                          INSTRUCTIONS","","1. OBJECTIVE - The object of the game is to become the wealthiest player","    through buying, renting and selling of property.",
               "","2. Each player will start with the amount of $1500.",
               "","3. All players will start at the 'GO' position and move in a clockwise direction around the board.",
@@ -162,10 +159,9 @@ positionsAndRentValue = {'GO':0,'BDSS':30,'BONUS MARKS':0,'WESTLANE':30,'GRAD FE
         'ORCHARD PARK': 75,'DSBN ACADEMY':75,'BONUS MARKS':0,'LAKESHORE':75,'BUS STOP 4': 50,'ANNOUNCEMENTS':0,'BLESSED TRINITY':85,'GRAD FEES':0,
         'GSS':85}
 
-# TESTING LOOP - This is not part of the code, but if you want to check the end of the game uncomment the next lines
-# for mykey in positionsAndRentValue.keys():
-#     positionsAndRentValue[mykey] *= 100
-
+# TESTING LOOP - This is not part of the code
+for mykey in positionsAndRentValue.keys():
+    positionsAndRentValue[mykey] *= 100
 # String Variables
 char='?'
 
@@ -175,10 +171,11 @@ class money_transformations:
     def normal_transformation(self, amount, paying, paid):
         global playersAndMoney
         playersAndMoney[paying] -= amount
+        if paid < 99999:
+            playersAndMoney[paid] += amount
 
 
-# This is the function which uses the above class and defines when to make the money transformation 
-# and when the user may not have enough money
+# This is the function which uses the above class and defines when to make the money transformation
 def use_money_class(amount = 0, paying = bank_balance, paid = bank_balance):
     global playersAndMoney, playerTurn, playersAndProperty, force_to_sell, dying_in_progress
     try:
@@ -189,7 +186,9 @@ def use_money_class(amount = 0, paying = bank_balance, paid = bank_balance):
                 myClass = money_transformations()
                 myClass.normal_transformation(amount, paying, paid)
             if dying_in_progress:
+                print(playersAndMoney['Player' + str(playerTurn)])
                 if playersAndMoney['Player' + str(playerTurn)] > 0:
+                    print("I go here for some reason")
                     force_to_sell = False
                 else:
                     force_to_sell = True
@@ -202,24 +201,20 @@ def use_money_class(amount = 0, paying = bank_balance, paid = bank_balance):
     except KeyError:
         pass
 
-# General class for building, houses and hotles will be child classes of this class
+
 class Building(object):
     def __init__(self, x, y, heights, lengths):
-        # The information here is the coordinates, height, and length as those always stay the same
         self.x = x
         self.y = y
         self.heights = heights
         self.lengths = lengths
-
-# Child class of the class defined above - building
+        
 class Houses(Building):
     def __init__(self, x, y, heights, lengths, colour, price, turn):
         super(Houses, self).__init__(x, y, heights, lengths)
-        # Variables that change: the turn, the house colours, and the price
         self.colour = colour
         self.price = price
         self.turn=turn
-    # This function builds the houses
     def BuildIt(self):
         school=loadImage('school'+str(self.turn)+'.png')
         image(school,self.x,self.y,self.heights,self.lengths)
@@ -232,6 +227,8 @@ def kicked_out():
     podiumPlayers.append(players[toKick])
     del playersAndMoney[toKick]
     del is_in_jail[toKick]
+    print(players[toKick])
+    print(listOfImages)
     listOfImages.remove(players[toKick])
     del players[toKick]
     del playersAndProperty[toKick]
@@ -241,7 +238,6 @@ def kicked_out():
     equal = False
     change_actual_turn()
 
-# Setting up images and the starting screen
 def setup():
     global sf, first, secon, img3, img4, img5, img6
     textSize(24)
@@ -250,7 +246,6 @@ def setup():
     img2=loadImage('mono.png')
     imageMode(CENTER)
     image(img2,400,300,800,600)
-    # This images are for a gif we implemented
     first = loadImage("frame_0_delay-0.1s.gif")
     secon = loadImage("frame_1_delay-0.1s.gif")
     img3 = loadImage("frame_2_delay-0.1s.gif")
@@ -260,17 +255,14 @@ def setup():
     minim=Minim(this)
     sf=minim.loadFile("MonopolyBackgroundMusic.mp3")
 
-# buy/sell/pass/house/info buttons and deciding when are they showed
+# buy/sell/pass buttons
 def background_buttons(buy, pas, to_info, to_sell, houses):
-    # Loading images which will usually be used
     imageMode(CENTER)
     buttonP=loadImage('buy.png')
     buttonPass=loadImage('pass.png')
     sell=loadImage('sell.png')
     house=loadImage('houses.png')
     info=loadImage('info.png')
-    
-    # Makes the button glow if the mouse is there
     if 805 <= mouseX <= 990 and 20 <= mouseY <= 100 and buy==True:
         buy2=loadImage('buy2.png')
         image(buy2,900,60,190,80)
@@ -278,8 +270,10 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
         if buy:
             noTint()
             image(buttonP,900,60,190,80)
-    # Makes the pass button glow if the mouse is there
-    if 805 <= mouseX <= 990 and 115 <= mouseY <= 205 and pas == True:
+        else:
+            tint(255, 126)
+        
+    if 805 <= mouseX <= 990 and 115 <= mouseY <= 205 and pas==True:
         noTint()
         pass2=loadImage('pass2.png')
         image(pass2,900,160,190,80)
@@ -287,8 +281,9 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
         if pas:
             noTint()
             image(buttonPass,900,160,190,80)
+        else:
+            pass
     
-    # Makes the info button glow if the mouse is there
     if 805 < mouseX < 995 and 420 < mouseY < 500 and to_info == True:
         noTint()
         info2=loadImage('info2.png')
@@ -297,8 +292,9 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
         if to_info:
             noTint()
             image(info,900,460,190,80)
+        else:
+            tint(255, 126)
     
-    # Makes the sell button glow if the mouse is there
     if 805 < mouseX < 995 and 220 < mouseY < 300 and to_sell == True:
         sell2=loadImage('sell2.png')
         image(sell2,900,260,190,80)
@@ -306,8 +302,9 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
         if to_sell:
             noTint()
             image(sell,900,260,190,80)
-    
-    # Make the house button glow if the mouse is there
+        else:
+            tint(255, 126)
+
     if 805 <= mouseX <= 995 and 320 < mouseY < 400 and houses==True:
         house2=loadImage('house2.png')
         image(house2,900,360,190,80)
@@ -315,43 +312,35 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
         if houses:
             noTint()
             image(house,900,360,190,80)
+        else:
+            tint(255, 126)
+    noTint()
 
-# This function will take care of delaney's text (in-game instructor)
 def delaney_talking(enter, pay = 0, mySize = 12):
     global positionsAndRentValue, playersAndMoney, playerTurn
     delan=loadImage('delaney.png')
     image(delan,250,350,300,300)
     textSize(mySize)
-    fill(0)
-    try:
-        if pay <= playersAndMoney["Player" + str(playerTurn)]:
-            text(enter, 235, 250)
-        else:
-            text("You must pay $" + str(pay) +  " rent \nYou are missing " + 
-            str(pay - playersAndMoney["Player" + str(playerTurn)]) + 
-            ", \nYou must sell a property.\nOnce finished, click RIGHT" , 235, 250)
-    except KeyError:
+    if pay <= playersAndMoney["Player" + str(playerTurn)]:
         text(enter, 235, 250)
+    else:
+        text("You must pay $" + str(pay) +  " rent \nYou are missing " + 
+        str(pay - playersAndMoney["Player" + str(playerTurn)]) + 
+        ", \nYou must sell a property.\nOnce finished, click RIGHT" , 235, 250)
 
-# Whenever a mouse is pressed, this function takes place
 def mousePressed():
     global roll, equal, talking, infoShow,sellShow, purchase_in_progress, show_other_text, playersAndMoney, char, should_print_failure, should_print_sucess, \
     counter_of_equal, playerTurn, plyersCoord, is_in_jail, die, playersAndProperty, toShow, is_cards, myPlace, myann, jail_in_progress, wait, sold, cool_bonus,\
     house_in_progress, countdown, three_in_row, HouseAngleList, infoShow
     if sellMouse==1:
         talking=1
-    
-    # Assuming the user is attempting to create a house
     if house_in_progress == True:
-        # When the user presses on the button
         if 805 <= mouseX <= 995 and 320 < mouseY < 400:
-            # If they have enough money....
             if playersAndMoney['Player'+str(playerTurn)] >= 100:
                 playersAndMoney['Player'+str(playerTurn)] -= 100
                 xer=(plyersCoord['Player'+str(playerTurn)][0])
                 yer=(plyersCoord['Player'+str(playerTurn)][0])
                 turned=1
-                # This is an algorithm to detmine where the house will be placed
                 if plyersCoord['Player'+str(playerTurn)][1] < 80:
                     xer=(plyersCoord['Player'+str(playerTurn)][0])
                     turned=1
@@ -370,7 +359,7 @@ def mousePressed():
                     turned=4
                 objects=Houses(xer,yer,
                                 50,50,'green',100,turned)
-                # Using the class function to actually show the house
+                print(objects)
                 objects.BuildIt()
                 user_houses[places[plyersCoord['Player'+str(playerTurn)][2]]] = [xer, yer]
                 new = int(positionsAndRentValue[places[plyersCoord['Player'+str(playerTurn)][2]]] * 0.5)
@@ -378,42 +367,48 @@ def mousePressed():
                 HouseAngleList[places[plyersCoord['Player'+str(playerTurn)][2]]] = turned
                 
             else:
-                # A case scenrio when the user lacks money
-                delaney_talking("No enough Money!")
+                textSize(12)
+                delan=loadImage('delaney.png')
+                image(delan,250,350,300,300)
+                text("No enough Money!", 235, 250)
+            print(1)
             change_actual_turn()
             house_in_progress = False
-        # When the user presses on pass, nothing happen
-        elif 805 <= mouseX <= 995 and 120 <= mouseY < =200:
+        elif 805<=mouseX<= 995 and 120<=mouseY<=200:
             house_in_progress = False
+            print(2)
             change_actual_turn()
+    print('sell show is', sellShow)
     if (infoShow==2 or infoShow==1) and sellShow != 1:
-        # When the user pressed on the mouse button
+        print("got to info show, it is", infoShow)
         if 805 < mouseX and mouseX < 995 and 420 < mouseY and mouseY < 500:
+            print("and now it's here again? info show is", infoShow)
             infoShow = 1
         if 465<mouseX<535 and 365<mouseY<425:
+            print('supposed to turn to 2 info show is', infoShow)
             infoShow=2
     if (sellShow == 2 or sellShow == 1) and infoShow != 1:
         if 805 < mouseX < 995 and 220 < mouseY < 300:
             talking = 0
             selling()
         if 465<mouseX<535 and 390 < mouseY < 450:
+            print("around here")
             sellShow = 2
-    if roll == True:
+    if roll==True:
         wait = False
         cool_bonus = False
         toShow = False
         purchase_in_progress = False
         is_cards = False
         if 360 <= mouseX <= 435 and 260 <= mouseY <= 335:
-            # Rolling the die once the user presses on the board die 
             global die, one, two, dice
-            # the countdown is what creates the gif for dies
             countdown = 6
             die = True
             roll = False
             one = int(random.randint(1,6))
             two = int(random.randint(1,6))
             dice = one + two
+            dice = 6
             if is_in_jail['Player'+str(playerTurn)] == False:
                 if one == two:
                     equal = True
@@ -433,13 +428,15 @@ def mousePressed():
                     if is_in_jail['Player'+str(playerTurn)] == 0:
                         is_in_jail['Player'+str(playerTurn)] = False
                     change_actual_turn()
-    # This lines occurs if the user has the chance to purchase a property
+                    
     elif purchase_in_progress == True:
         if 805 <= mouseX <= 990 and 20 <=mouseY<= 100 and not jail_in_progress and not in_parking and not rent_in_progress:
-            # Assuming the user presses on buy and they have enough money, the purchase will be successful.
             if mousePressed and playersAndMoney['Player'+str(playerTurn)] >= positionsAndCosts[places[plyersCoord['Player'+str(playerTurn)][2]]] and \
                 purchase_in_progress and not is_cards and not toShow:
-                delaney_talking("Purchase Successful!")
+                textSize(12)
+                delan=loadImage('delaney.png')
+                image(delan,250,350,300,300)
+                text("Purchase Successful!", 235, 250)
                 should_print_sucess = True
                 show_other_text = False
                 purchase_in_progress = False
@@ -447,12 +444,17 @@ def mousePressed():
                 playersAndProperty['Player'+str(playerTurn)].append(places[plyersCoord['Player'+str(playerTurn)][2]])
                 bank_places.remove(places[plyersCoord['Player'+str(playerTurn)][2]])
                 
-                # This lines check whether the property is a bus, in which case the rent changes accordingly
+                # This lines check whether the property exists
                 current_property = places[plyersCoord['Player'+str(playerTurn)][2]]
+                print(current_property)
                 if 'BUS STOP' in current_property:
+                    print("dictionary", playersAndBuses)
                     playersAndBuses['Player'+str(playerTurn)] += 1
                     totalBuses = playersAndBuses['Player'+str(playerTurn)]
+                    print("There are", totalBuses, "buses")
                     value = 50 * totalBuses
+                    print("The money value is", value)
+                    print(playersAndProperty['Player'+str(playerTurn)])
                     if 'BUS STOP 1' in playersAndProperty['Player'+str(playerTurn)]:
                         positionsAndRentValue['BUS STOP 1'] = value
                     if 'BUS STOP 2' in playersAndProperty['Player'+str(playerTurn)]:
@@ -461,19 +463,23 @@ def mousePressed():
                         positionsAndRentValue['BUS STOP 3'] = value
                     if 'BUS STOP 4' in playersAndProperty['Player'+str(playerTurn)]:
                         positionsAndRentValue['BUS STOP 4'] = value
-                # Property is purchased, turn is over
                 change_actual_turn()                             
             elif mousePressed and playersAndMoney['Player'+str(playerTurn)] < positionsAndCosts[places[plyersCoord['Player'+str(playerTurn)][2]]]:
-                delaney_talking("Not enough money!")
+                textSize(12)
+                delan=loadImage('delaney.png')
+                image(delan,250,350,300,300)
+                text("Not enough money!", 235, 250)
                 should_print_failure = True
                 show_other_text = False
                 purchase_in_progress = False
                 change_actual_turn()   
-        # If the user presses on pass
         elif 805 <= mouseX <= 990 and 115 <= mouseY <= 205 and not jail_in_progress and not is_cards and not toShow and not in_parking:
             purchase_in_progress = False
             show_other_text = False
-            delaney_talking("Did not purchase!")
+            delan=loadImage('delaney.png')
+            image(delan,250,350,300,300)
+            textSize(12)
+            text("Did not purchase!", 235, 250)
             change_actual_turn()
         elif 325 <= mouseX <= 525 and 325 <= mouseY <= 525 and is_cards:
             if not toShow:
@@ -482,7 +488,11 @@ def mousePressed():
                     if myBonus == 'keep going':
                         cool_bonus = True
                         is_cards = False
-                        delaney_talking(bonus[myBonus])
+                        delan=loadImage('delaney.png')
+                        image(delan,250,350,300,300)
+                        fill(0)
+                        textSize(12)
+                        text(bonus[myBonus], 230, 250)
                     else:
                         rectMode(CENTER)
                         fill(244, 244, 244)
@@ -493,7 +503,6 @@ def mousePressed():
                         textSize(12)
                         text(bonus[myBonus], 355, 420)
                         text('Click on the card to continue!', 330, 470)
-                # Showing the announcement card
                 else:
                     rectMode(CENTER)
                     fill(244, 244, 244)
@@ -504,9 +513,7 @@ def mousePressed():
                     textSize(12)
                     text(announcements[myann], 355, 420)
                     text('Click on the card to continue!', 330, 470)
-                
             else:
-                # Showing the bonus mark card
                 if myPlace == 'BONUS MARKS':
                     if myBonus == 'go':
                         plyersCoord['Player'+str(playerTurn)][2] = 0
@@ -516,7 +523,11 @@ def mousePressed():
                     elif myBonus == '200 money':
                         use_money_class(-200,'Player' + str(playerTurn))
                     elif myBonus == 'keep going':
-                        delaney_talking(bonus[myBonus])
+                        print("here")
+                        delan=loadImage('delaney.png')
+                        image(delan,250,350,300,300)
+                        textSize(12)
+                        text(bonus[myBonus], 229, 250)
                         wait = True
                         
                 else:
@@ -535,22 +546,23 @@ def mousePressed():
                 toShow = False
                 purchase_in_progress = False
                 if not wait:
+                    print(6)
                     if not force_to_sell:
                         change_actual_turn()
                 else:
                     wait = False
-# This function occurs whenever the user releases a key
+
 def keyReleased():
     global startGame, sellKey, playersAndProperty, indexer, sellShow, talking, jailedKey, inter, intructions, purchase_in_progress, show_other_text, \
     jail_in_progress, places, plyersCoord, playerTurn, fees_in_progress, rent_in_progress, die, attempt_one, toFind, positionsAndRentValue, playedPaid, \
     in_parking,instruct, parkingMoney, countDeaths,podiums,kick_in_progress, force_to_sell, delaney_forces, bank_places, three_in_row, equal, die, user_houses, gameOVer
-    # if sell is going on
+
     if sellKey == 1:
         if key == 'y':
-            # The user agreed to sel
             myPlace = playersAndProperty['Player'+str(playerTurn)].index(places[indexer+1])
             property = places[indexer+1]
-            # Buses have special conditions under rent
+            print(property)
+            print(user_houses)
             if 'BUS STOP' in property:
                 if 'BUS STOP 1' in property:
                     positionsAndRentValue['BUS STOP 1'] -= 50
@@ -570,10 +582,14 @@ def keyReleased():
             bank_places.append(places[indexer+1])
             playersAndMoney['Player'+str(playerTurn)] += (sellingCost/2)
             board=loadImage('mon.png')
+            delan=loadImage('delaney.png')
             image(board,400,300,800,600)
-            delaney_talking("Ok")
+            image(delan,250,350,300,300)
+            textSize(12)
+            text("Ok", 235, 250)
             sellKey = 0
             sellMouse = 0
+            print("around here")
             sellShow = 2
             talking = 0
             delaney_forces = False
@@ -583,15 +599,16 @@ def keyReleased():
             sellMouse = 0
             sellKey = 0
             talking = 0
-    if keyCode == SHIFT and startGame == False:
-        instruct = False
-        startGame = True
-        inter = False
-    elif key == 'r':
+    if keyCode==SHIFT and startGame==False:
+        instruct=False
+        startGame=True
+        inter=False
+    elif key =='r':
         intructions = True
     if keyCode == RIGHT:
         # GRAD FEES
         if fees_in_progress:
+            print(7)
             if not force_to_sell:
                 fees_in_progress = False
                 change_actual_turn()
@@ -604,13 +621,14 @@ def keyReleased():
                 use_money_class(amount, "Player" + str(playerTurn), playerPaid)
                 use_money_class(-amount, playerPaid, "Player" + str(playerTurn)) 
             else:
+                print("got to send,")
                 use_money_class(-positionsAndRentValue[toFind], playerPaid, "Player" + str(playerTurn))  
                 use_money_class(positionsAndRentValue[toFind], "Player" + str(playerTurn), playerPaid)
             rent_in_progress = False                   
             if not force_to_sell:
                 purchase_in_progress = False
                 attempt_one = False
-        # Actually sending to jail if they rolled three in a row
+                # change_actual_turn()
         elif three_in_row:
             is_in_jail['Player'+str(playerTurn)] = 2
             counter_of_equal = 0
@@ -620,21 +638,19 @@ def keyReleased():
             die = False
             equal = False
             three_in_row = False
-            # user is sent to jail, therefore the turn is over
+            print(9)
             change_actual_turn()
-        # This is if the user is sent to jail
         elif jailedKey == True:
             jail_in_progress = False
-            # Dictionaries and coordinates are changed appropiartely.
             is_in_jail['Player' + str(playerTurn)] = 2
             plyersCoord['Player'+str(playerTurn)][2] = 10
             plyersCoord['Player'+str(playerTurn)][0] = 65
             plyersCoord['Player'+str(playerTurn)][1] = 555
             purchase_in_progress = False
             die = False
+            print(10)
             change_actual_turn()
             jailedKey=False
-        # Providing money if the user landed on "student parking" spot
         elif in_parking:
             use_money_class(-parkingMoney,'Player' + str(playerTurn))
             parkingMoney = 0
@@ -643,7 +659,6 @@ def keyReleased():
             purchase_in_progress = False
             change_actual_turn()
         elif gameOver:
-            # Showing the podium
             podiums=True
             podium()
         elif kick_in_progress and countDeaths != (numberChar):
@@ -657,13 +672,20 @@ def game_start():
     faded=loadImage('mono.png')
     imageMode(CENTER)
     image(faded,400,300,800,600)
-
+    delan=loadImage('delaney.png')
+    image(delan,250,350,300,300)
     if delane==0:
-        delaney_talking("Hello,\nI am Mr.Delaney!\nTo continue press space...")
+        fill(0)
+        textSize(12)
+        text("Hello,\nI am Mr.Delaney!",235,250)
+        text('To continue press space...',235,285)
         if key==' ':
             delane=1
     else:
-        delaney_talking('WELCOME TO MONOPOLY\nSCHOOL EDITION\nTo start, press Shift\nFor rules, press "r"')
+        fill(0)
+        textSize(12)
+        text("WELCOME TO MONOPOLY\nSCHOOL EDITION",235,250)
+        text('To start, press Shift\nFor rules, press "r".',235,285)
 
 # This function takes user input for how many characters are in the game
 def character_number():
@@ -677,7 +699,12 @@ def character_number():
     fill(255)
     rectMode(CENTER)
     rect(315,400,100,50)
-    delaney_talking("CHoOSE NUMBER OF CHAR!\n\nType into box from 2-4!")
+    delan=loadImage('delaney.png')
+    image(delan,250,350,300,300)
+    fill(0)
+    textSize(12)
+    text("CHOSE NUMBER OF CHAR!",235,250)
+    text('Type into box from 2-4!',235,285)
     textSize(20)
     if keyPressed and len(listOfNum)==0:
         if key=='2' or key=='3' or key=='4':
@@ -725,7 +752,6 @@ def set_character():
     x=plyersCoord['Player'+str(playerTurn)][0]
     y=plyersCoord['Player'+str(playerTurn)][1]
     set_coordinates()
-    # Checking what buttons should be showed
     if house_in_progress:
         b = True
         e = True
@@ -736,7 +762,6 @@ def set_character():
         a = True
     else:
         a = False
-    # Sending this variables into a function
     background_buttons(a, b, True, True, e)
     draw_button(playerTurn)
     if len(user_houses.values()) > 0:
@@ -744,7 +769,7 @@ def set_character():
             school=loadImage('school'+str(HouseAngleList.values()[i])+'.png')
             image(school,int(user_houses.values()[i][0]),int(user_houses.values()[i][1]),50,50)
 
-# shows all dies
+
 def show_dices():
     textSize(24)
     text("Die:", 600, 125)
@@ -763,7 +788,21 @@ def show_dices():
     strokeWeight(4)
     stroke(0)
 
-# The code behind the button which indicates the user's turn
+def purchase_things(place):
+    global purchase_in_progress, show_other_text
+    purchase_in_progress = True
+    show_other_text = True
+
+def passed_go():
+    global char, playerTurn, show_passed_go
+    if show_passed_go:
+        show_passed_go = True
+        fill(255, 0,0)
+        rect(300, 450, 400, 100)
+        fill(0)
+        textSize(20)
+        text('Player'+str(playerTurn) + ' recieves $200 for passing go', 120, 450)
+    
 def draw_button(playerTurn):
     textSize(20)
     bar=loadImage('IBar.png')
@@ -772,14 +811,16 @@ def draw_button(playerTurn):
     text('Player '+str(playerTurn),895,550)
     logo=loadImage(str(players['Player'+str(playerTurn)]))
     image(logo,850,550,40,40)
-
-# This function is constantly being called while the game function runs to indicate a turn is over and a new one is about to start
+    
 def change_actual_turn():
+    print("changing turn right now")
+    print("Players: %s")
     global playerTurn, numberChar
     if equal:
         pass
     else:
         while True:
+            print("The player turn is", playerTurn, "there are", numberChar, "characters")
             if playerTurn > 4:
                 playerTurn = 1
                 if "Player" + str(playerTurn) in players.keys():
@@ -788,8 +829,8 @@ def change_actual_turn():
                 playerTurn += 1
                 if "Player" + str(playerTurn) in players.keys():
                     break
-
-# Picking a random bonus card + showing it
+    print("The new turn is", playerTurn)
+        
 def bonus_cards():
     global bonus, announcements, myBonus
     myBonus = random.choice(bonus.keys())
@@ -800,8 +841,6 @@ def bonus_cards():
     fill(0)
     bonusImage=loadImage('bonus.png')
     image(bonusImage,425,425,150,150)
-
-# Picking a random announcement card + showing
 def my_ann():
     global bonus, announcements, myBonus, myann
     myann = random.choice(announcements.keys())
@@ -829,8 +868,8 @@ def game():
 
             should_print_sucess = False
             should_print_failure = False
-            if die == True or purchase_in_progress:
-                show_passed_go = True
+            if die==True or purchase_in_progress:
+                passed_go()
                 if not purchase_in_progress:
                     show_dices()
                     plyersCoord['Player'+str(playerTurn)][0]=coordinateXList[plyersCoord['Player'+str(playerTurn)][2]]
@@ -839,27 +878,24 @@ def game():
                         plyersCoord['Player'+str(playerTurn)][2]=0
                     else:
                         plyersCoord['Player'+str(playerTurn)][2]+=1
-                    # Providing the user with 200 dollars once they pass GO
+                    frameRate(8)
                     if places[plyersCoord['Player'+str(playerTurn)][2]] == 'GO':
                         use_money_class(-200,'Player' + str(playerTurn))
-                # This is what determines whether the user should actually move or not
                 if dice-1==counter or purchase_in_progress or rent_in_progress:
                     myPlace = places[plyersCoord['Player'+str(playerTurn)][2]]
-                    # another condition if the user landed on announcements or bonus cards
                     if places[plyersCoord['Player'+str(playerTurn)][2]] == 'BONUS MARKS' or places[plyersCoord['Player'+str(playerTurn)][2]] == 'ANNOUNCEMENTS':
                         is_cards = True
-                    # if the user landed on Grad Fees
                     elif places[plyersCoord['Player'+str(playerTurn)][2]] == 'GRAD FEES' and not fees_in_progress:
                         use_money_class(150, "Player" + str(playerTurn))
                         parkingMoney += 150
                         fees_in_progress = True
-                    # condition if the user landed on student parking
                     elif places[plyersCoord['Player'+str(playerTurn)][2]] == 'STUDENT PARKING':
                         in_parking = True
                     show_passed_go = False
                     if not rent_in_progress:
                         purchase_in_progress = True
                         show_other_text = True
+                        purchase_things(places[plyersCoord['Player'+str(playerTurn)][2]])
                         die=False
                         counter=0
                     if places[plyersCoord['Player'+str(playerTurn)][2]] in placesToNotDoAnything and not rent_in_progress:
@@ -868,8 +904,8 @@ def game():
                         else:
                             purchase_in_progress = False
                             die = False
+                            print(12)
                             change_actual_turn()
-                    # if the user landed on property owned by another player
                     elif not is_cards and places[plyersCoord['Player'+str(playerTurn)][2]] not in bank_places or rent_in_progress:
                         if not rent_in_progress:
                             toFind = places[plyersCoord['Player'+str(playerTurn)][2]]
@@ -887,10 +923,15 @@ def game():
                                     places[plyersCoord['Player'+str(playerTurn)][2]] not in user_houses:
                                     house_in_progress = True
                                 else:
+                                    print(13)
                                     change_actual_turn()
                                 purchase_in_progress = False
                         else:
-                            # Special properties
+                            # delan=loadImage('delaney.png')
+                            # image(delan,250,350,300,300)
+                            # textSize(12)
+                            # toFind -> place
+                            # positionsAndRentValue -> dictionary name
                             if toFind == 'DSBN' or toFind == 'NCDSB':
                                 amount = dice * 10
                                 delaney_talking("Private property!\nPay 10 * %s = $%s rent to \n%s! Press RIGHT \nARROW to advance!" % (str(dice), str(amount), playerPaid), amount)
@@ -898,9 +939,9 @@ def game():
                                 delaney_talking("Private property!\nPay $%s rent to %s!\nPress RIGHT ARROW to \nadvance!" % (str(positionsAndRentValue[toFind]), 
                                 playerPaid), positionsAndRentValue[toFind])
                             draw_button(playerTurn)
-
+                    else:
+                        pass
                 else:
-                    # The variables increases, until it will reach the die roll and the movement will stop
                     counter+=1
                 if len(players)>=numberChar and not rent_in_progress:
                     board = loadImage('mon.png')
@@ -920,20 +961,27 @@ def game():
                         a = False
                     else:
                         e = False
+                    print("b3")
                     background_buttons(a, b, True, True, e)
                     if len(user_houses.values())>0:
                         for i in range(0,len(user_houses.values())):
                             school=loadImage('school'+str(HouseAngleList.values()[i])+'.png')
                             image(school,int(user_houses.values()[i][0]),int(user_houses.values()[i][1]),50,50)
                     if places[plyersCoord['Player'+str(playerTurn)][2]] == 'GO TO' and purchase_in_progress:
-                        delaney_talking('You have landed in\nDetention!\nPress "RIGHT ARROW"\nto advance!')
+                        delan = loadImage('delaney.png')
+                        image(delan,250,350,300,300)
+                        textSize(12)
+                        text('You have landed in\nDetention!\nPress "RIGHT ARROW"\nto advance!', 235, 250)
                         equal = False
                         jail_in_progress = True
                     if toShow or is_cards or purchase_in_progress:
                         if toShow or is_cards or show_other_text == True and places[plyersCoord['Player'+str(playerTurn)][2]] in bank_places and \
                             places[plyersCoord['Player'+str(playerTurn)][2]] not in placesToNotDoAnything:
                             if is_cards and not toShow:
-                                delaney_talking("You landed on \n%s!\nClick on the card \nto see what you got! ")
+                                delan = loadImage('delaney.png')
+                                image(delan,250,350,300,300)
+                                textSize(12)
+                                text("You landed on \n%s!\nClick on the card \nto see what you got! " % myPlace, 235, 250)
                                 if myPlace == 'BONUS MARKS':
                                     bonus_cards()
                                 else:
@@ -943,7 +991,10 @@ def game():
                                     if myBonus == 'keep going':
                                         cool_bonus = True
                                         is_cards = False
-                                        delaney_talking(bonus[myBonus])
+                                        delan = loadImage('delaney.png')
+                                        image(delan,250,350,300,300)
+                                        textSize(12)
+                                        text(bonus[myBonus], 229, 250)
                                         spinDie()
                                         roll = True
                                     else:
@@ -970,14 +1021,21 @@ def game():
                                     text('Click on the card to continue!', 330, 470)
                             elif fees_in_progress:
                                 draw_button(playerTurn)
-                                delaney_talking("You have to pay $150 GRAD\n FEES press RIGHT \nARROW to advance")
+                                delan = loadImage('delaney.png')
+                                image(delan,250,350,300,300)
+                                textSize(12)
+                                text("You have to pay $150 GRAD\n FEES press RIGHT \nARROW to advance", 230, 250)
                             elif in_parking:
-                                delaney_talking('You recieve $%s from\nStudent Parking! Click \nRIGHT ARROW to advance!' % parkingMoney)
+                                delan = loadImage('delaney.png')
+                                image(delan,250,350,300,300)
+                                textSize(12)
+                                text('You recieve $%s from\nStudent Parking! Click \nRIGHT ARROW to advance!' % parkingMoney, 235, 250)
                             elif purchase_in_progress == True:
                                 delan = loadImage('delaney.png')
                                 image(delan,250,350,300,300)
                                 ph = places[plyersCoord['Player'+str(playerTurn)][2]]
                                 if str(ph) == 'NIAGARA CATHOLIC':
+                                    print("sup")
                                     textSize(10)
                                 else:
                                     textSize(12)
@@ -1057,6 +1115,7 @@ def podium():
     img2=loadImage('mono.png')
     image(img2,400,300,800,600)
     image(podiumImage,400,300,400,400)
+    print(podiumPlayers)
     if podiumNumberChar==2:
         dude=loadImage(str(podiumPlayers[1]))
         image(dude,400,150,150,150)
@@ -1082,6 +1141,7 @@ def podium():
 def draw():
     global x,y, sf, count,img,img1, die,inter, counter, dice, numberChar, playerTurn, char, equal, intructions, purchase_in_progress, kickedGuy, kick_in_progress, \
     delaney_forces, first,stopIt, secon,countDeaths, purchase_in_progress, instruct, img3, img4, img5, img6, countdown, big_x, three_in_row, sellShow, gameOver
+    # print(mouseX,mouseY)
     if podiums==True:
         podium()
     else:
@@ -1103,13 +1163,21 @@ def draw():
                     pass
                 else:
                     countDeaths += 1
+                delan=loadImage('delaney.png')
+                image(delan,250,350,300,300)
+                textSize(12)
+                print(countDeaths, numberChar)
                 if countDeaths==(numberChar) or gameOver:
                     gameOver = True
-                    delaney_talking('The game is over!\nClick RIGHT ARROW \nto view podium!')
+                    text('The game is over!\nClick RIGHT ARROW \nto view podium!', 235, 250)
+                    print(listOfImages)
                     if len(podiumPlayers)==podiumNumberChar:
                         pass
                     else:
                         podiumPlayers.append(listOfImages[0])
+                    print(numberChar)
+                    print('Winner'+str(listOfImages))
+                    print('Losers'+str(podiumPlayers))
                 else:
                     text('Player %s is bankrupt, to \ncontinue with %s players \nclick RIGHT ARROW\nOtherwise, click Esc' % (str(kickedGuy), str(numberChar)), 235, 250)
                     stopIt=True
@@ -1133,7 +1201,11 @@ def draw():
                     big_x += 1
                 countdown -= 1
             elif three_in_row:
-                delaney_talking("Third Double roll!\nGo to detention!\nPress RIGHT ARROW")
+                set_character()
+                delan=loadImage('delaney.png')
+                image(delan,250,350,300,300)
+                textSize(12)
+                text("Third Double roll!\nGo to detention!\nPress RIGHT ARROW", 235, 250)
             elif house_in_progress == True:
                 HousingFunction()
             elif force_to_sell:
@@ -1141,6 +1213,7 @@ def draw():
                 image(delan,250,350,300,300)
                 textSize(12)
                 text('You run out of money to\npay your debt!\nYou must sell a property!\nClick on Sell!', 235, 250)
+                print('b4')
                 background_buttons(False, False, False, True, False)
             elif delaney_forces:
                 sellShow = 1
@@ -1154,6 +1227,7 @@ def HousingFunction():
     image(delan,250,350,300,300)
     textSize(12)
     text('You own this property!\nClick houses to put a house \non it for $100! Or pass!', 235, 250)
+    print('b1')
     background_buttons(False, True, True, True, True)
 
 def infoFunction():
@@ -1171,7 +1245,6 @@ def infoFunction():
         counted+=20
     fill(0)
 
-# This function is called anytime the user presses the selling button
 def selling():
     global sellShow, playerTurn, talking, sellMouse, sellKey, indexer, playersAndProperty
     sellShow = 1
@@ -1192,6 +1265,7 @@ def selling():
         image(sellBox,400,300,400,400)
         image(exits,500,425,100,100)
         for i in range(0,len(coordinateXList)):
+            print("the player turn is", playerTurn)
             try:
                 if (-10<mouseY<80 and 0<mouseX<115) or (520<mouseY<600 and -10<mouseX<115) or (-10<mouseY<80 and 685<mouseX<1000) or (520<mouseY<600 and 685<mouseX<1000):
                     pass
@@ -1218,6 +1292,7 @@ def selling():
                     else:
                         mousyY=745
                         indexer=(29-coordinateYList.index(coordinateYList[i]))+19
+                    print(places[indexer+1])
                     if places[indexer+1] in playersAndProperty['Player'+str(playerTurn)]:
                         fill(0,127)
                         rect(mousyY,coordinateYList[i]+5,110,50)
@@ -1229,7 +1304,6 @@ def selling():
             except IndexError:
                 break
 
-# This function occurs after the turn is changed and shows the die image
 def spinDie():
     global roll, actualTurn,infoShow, sellShow, dying_in_progress
     dying_in_progress = False
@@ -1241,7 +1315,10 @@ def spinDie():
         imageMode(CENTER)
         image(diceImage,400,300,100,100)
         if is_in_jail['Player' + str(playerTurn)] != False:
-            delaney_talking("You're locked in detention!\nGet double to go free!")
+            delan=loadImage('delaney.png')
+            image(delan,250,350,300,300)
+            textSize(12)
+            text("You're locked in detention!\nGet double to go free!", 235, 250)
     elif infoShow == 1:
         infoFunction()
     elif sellShow == 1:
@@ -1249,7 +1326,6 @@ def spinDie():
     img1=loadImage(str(char))
     roll=True
 
-# Chossing character
 def chooseChar():
     global char, numberChar, c,listOfImages
     textSize(50)
@@ -1271,7 +1347,6 @@ def chooseChar():
     character4=loadImage('eagle.png')
     image(character4,645,300,115,115)
     strokeWeight(4)
-    # If the user picks bulldog
     if 'bulldog.png' in players.values():
         tint(167)
         stroke(0)
@@ -1302,7 +1377,6 @@ def chooseChar():
                     c+=1
                     listOfImages.append(char)
                     strokeWeight(0)
-    # Otherwise if the user picks bucanners
     if 'bucanners.png' in players.values():
             tint(167)
             stroke(0)
@@ -1332,7 +1406,6 @@ def chooseChar():
                     c += 1
                     listOfImages.append(char)
                     strokeWeight(0)
-    # Otherwise if the user picks bolt
     if 'bolt.png' in players.values():
             tint(167)
             stroke(0)
@@ -1362,7 +1435,6 @@ def chooseChar():
                     c+=1
                     listOfImages.append(char)
                     strokeWeight(0)
-    # Otherwise if the user picks eagle
     if 'eagle.png' in players.values():
             tint(167)
             stroke(0)
@@ -1380,7 +1452,6 @@ def chooseChar():
             if mouseButton==LEFT:
                 if 'eagle.png' in players.values():
                     pass
-                # Entering the eagle as part of the players
                 else:
                     char='eagle.png'
                     players['Player'+str(c)]='eagle.png'
@@ -1390,7 +1461,7 @@ def chooseChar():
                     playersAndProperty['Player'+str(c)] = []
                     is_in_jail['Player'+str(c)] = False
                     playersAndBuses['Player'+str(c)] = 0
-                    c += 1
+                    c+=1
                     listOfImages.append(char)
                     strokeWeight(0)
     noTint()
@@ -1398,6 +1469,3 @@ def chooseChar():
 def startIt():
     global startGame
     startGame = False
-    
-# Code finished so far!
-
