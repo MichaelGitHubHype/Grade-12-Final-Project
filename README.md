@@ -9,3 +9,10 @@ Game features:
 
 
 ![alt text](https://lh6.googleusercontent.com/n8nzUX_Nm-UhNif__OYy43lILWDRwKje5M707g2Am2hA4VCmL-JuZXl6_L3rw3FNMiVB1vOqtn9vRuaJ3bTu-GKFR3PsU6iCtRnhIxeH4XmkeE9I-kWwb-4sJxxw4G4k5uEKL0_h "Logo Title Text 1")
+
+
+
+# Downloading 
+
+This game was created using processing 3.3.7. Visit this link to download the program: https://processing.org/download/
+Once processing is downloaded, go to extensions and install the python extension. Once installed, open the repositery files in the processing directory. Run the code, and there you have it! 
