@@ -177,7 +177,8 @@ class money_transformations:
         playersAndMoney[paying] -= amount
 
 
-# This is the function which uses the above class and defines when to make the money transformation and when the user may not have enough money
+# This is the function which uses the above class and defines when to make the money transformation 
+# and when the user may not have enough money
 def use_money_class(amount = 0, paying = bank_balance, paid = bank_balance):
     global playersAndMoney, playerTurn, playersAndProperty, force_to_sell, dying_in_progress
     try:
@@ -218,7 +219,7 @@ class Houses(Building):
         self.colour = colour
         self.price = price
         self.turn=turn
-    # This function is designed to actually build the houses
+    # This function builds the houses
     def BuildIt(self):
         school=loadImage('school'+str(self.turn)+'.png')
         image(school,self.x,self.y,self.heights,self.lengths)
@@ -240,7 +241,7 @@ def kicked_out():
     equal = False
     change_actual_turn()
 
-# setting up images and the starting screen
+# Setting up images and the starting screen
 def setup():
     global sf, first, secon, img3, img4, img5, img6
     textSize(24)
@@ -306,7 +307,7 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
             noTint()
             image(sell,900,260,190,80)
     
-    # Makes the house button if the mouse is there
+    # Make the house button glow if the mouse is there
     if 805 <= mouseX <= 995 and 320 < mouseY < 400 and houses==True:
         house2=loadImage('house2.png')
         image(house2,900,360,190,80)
@@ -315,7 +316,7 @@ def background_buttons(buy, pas, to_info, to_sell, houses):
             noTint()
             image(house,900,360,190,80)
 
-# This function will take care of delaney's text 
+# This function will take care of delaney's text (in-game instructor)
 def delaney_talking(enter, pay = 0, mySize = 12):
     global positionsAndRentValue, playersAndMoney, playerTurn
     delan=loadImage('delaney.png')
