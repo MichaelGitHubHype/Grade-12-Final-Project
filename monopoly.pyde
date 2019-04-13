@@ -160,8 +160,6 @@ positionsAndRentValue = {'GO':0,'BDSS':30,'BONUS MARKS':0,'WESTLANE':30,'GRAD FE
         'GSS':85}
 
 # TESTING LOOP - This is not part of the code
-for mykey in positionsAndRentValue.keys():
-    positionsAndRentValue[mykey] *= 100
 # String Variables
 char='?'
 
@@ -408,7 +406,6 @@ def mousePressed():
             one = int(random.randint(1,6))
             two = int(random.randint(1,6))
             dice = one + two
-            dice = 6
             if is_in_jail['Player'+str(playerTurn)] == False:
                 if one == two:
                     equal = True
