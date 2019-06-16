@@ -1,4 +1,4 @@
-# Grade 12 Final Project
+# Monopoly Working Game
 This project is a monopoly game using python - it is my grade 12 final project for computer science. This project was built on a GUI and to run it you'll have to download the program processing with python 3.3.6.
 
 Game features:
