@@ -16,3 +16,7 @@ Game features:
 
 This game was created using processing 3.3.7. Visit this link to download the program: https://processing.org/download/
 Once processing is downloaded, go to extensions and install the python extension. Once installed, open the repositery files in the processing directory. Run the code, and there you have it! 
+
+## Contributors:
+(Me) 
+Jake Graef (teamate)
